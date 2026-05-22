@@ -28,11 +28,12 @@ def logica(*dizionari: dict) -> dict:
     dizoutput_loc = {}
     prova = 0
 
-    for diz in dizionari:
-        if not isinstance(diz, dict):
-            prova += 1
-            
-    if prova == 0:
+    while prova == 0:
+        for diz in dizionari:
+            if not isinstance(diz, dict):
+                prova += 1
+                
+            dizoutput_loc.update(diz)
         return dizoutput_loc
     else:
         print("Almeno uno dei parametri non è un dizionario")
@@ -48,12 +49,12 @@ def main():
     """
     dizoutput = {}
     
-    diz1 = []
-    diz2 = ('a', 'b', 'c')
-    diz3 = []
-    # diz1 = {'v1':1,'v2':2,'v3':3}
-    # diz2 = {'v4':4,'v5':5,'v6':6}
-    # diz3 = {'v7':7,'v8':8}
+    # diz1 = []
+    # diz2 = ('a', 'b', 'c')
+    # diz3 = []
+    diz1 = {'v1':1,'v2':2,'v3':3}
+    diz2 = {'v4':4,'v5':5,'v6':6}
+    diz3 = {'v7':7,'v8':8}
     
     dizoutput = logica(diz1, diz2, diz3)
     

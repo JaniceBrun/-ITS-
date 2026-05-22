@@ -1,0 +1,41 @@
+BRUN JANICE DOMANDE VERIFICA_PITONE 
+
+Domanda 1
+Differenza tra errore di sintassi ed errore logico. Fai un esempio per ciascuno.
+Sintassi: si presenta quando il codice non rispetta la sintassi del linguaggio. Python non riconosce e non può eseguire
+es : print("miao)
+     prnt("ciao')
+Logica: sintassi corretta ma il programma non funziona a causa di un errore funzionale. Di logica appunto
+def pari(n):
+    return n % 2 == 1
+
+--------------------------------------------------------------------------
+
+Domanda 2
+Spiega cosa sono le eccezioni in Python e come funziona try/except.
+Le eccezoni sono errori che avvengono durante l'esecuzione del programma. Try/except permette di gestirle intercettandole in modo da non
+far bloccare il programma
+
+--------------------------------------------------------------------------
+
+Domanda 3
+Cosa significa che un file viene aperto con with open(...) as f:? Perché è preferibile rispetto a
+open() semplice?
+
+Quando uso with open() as f sto usando un context manager. La gestione dell'apertura e chiusura del file diventa automatica 
+e non c'è necessità di usare close(). Rende il codice più sicuro leggibile e non c'è rischio di perdita di risorse in caso di errori.
+Usando open() bisogna ricordarsi di chiamare close() e c'è il rischio di generare errori in caso di blocco del programma
+--------------------------------------------------------------------------
+
+Domanda 4
+Spiega la differenza tra una funzione che stampa un valore e una funzione che usa return
+Return: restituisce un valore al chiamate, può essere riutilizzato, senza print non stampa nulla. 
+Stampa: mostra solo il valore sullo schermo ma non restutiusce nulla al programma. Usata per visualizzazione, 
+non può essere usata in calcoli e il suo risultato è None
+
+--------------------------------------------------------------------------
+
+Domanda 5
+Spiega cosa significa “parsing” di un file di log e perché è utile in ambito cloud.
+Il parsing di un file è la lettura ed analizzazione riga per riga qi questo per estrarre informazioni come errori, ip , timestamo
+o eventi. In cloud è fondamentale per il monitoraggio di servizi. Permette di individuare rapidamenta malfunzionameti o bug.
