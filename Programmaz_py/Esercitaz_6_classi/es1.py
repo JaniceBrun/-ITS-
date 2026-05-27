@@ -11,19 +11,22 @@
 
 class Insegnante(object):
     """Classe che rappresenta un insegnante con nome, età e stipendio (privato)"""
-    def __init__(self, nome, eta, stipendio):
+    def __init__(self, nome: str, eta: int, stipendio: float):
 
         self.nome = nome
         self.eta = eta
         self.__stipendio = stipendio
 
     # getter e setter per nome
+
     @property
     def nome(self):
+        """Metodo getter per l'attributo nome"""
         return self.__nome
     
     @nome.setter
     def nome(self, nome):
+        """Metodo setter per l'attributo nome che verifica che il valore sia una stringa non vuota"""
         if isinstance(nome, str) and len(nome) > 0:
             self.__nome = nome
         else:
@@ -33,10 +36,12 @@ class Insegnante(object):
         
     @property    
     def eta(self):
+        """Metodo getter per l'attributo eta"""
         return self.__eta
     
     @eta.setter
     def eta(self, eta):
+        """Metodo setter per l'attributo eta che verifica che il valore sia un numero intero positivo"""
         if isinstance(eta, int) and eta > 0:
             self.__eta = eta
         else:
@@ -46,10 +51,12 @@ class Insegnante(object):
         
     @property
     def stipendio(self):
+        """Metodo getter per l'attributo stipendio"""
         return self.__stipendio        
         
     @stipendio.setter
     def stipendio(self, stipendio):
+        """Metodo setter per l'attributo stipendio che verifica che il valore sia un numero"""
         if isinstance(stipendio, (float, int)):
             self.__stipendio = stipendio
         else:

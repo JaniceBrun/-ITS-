@@ -27,7 +27,7 @@ class Rettangolo(object):
         """Metodo che calcola l'area del rettangolo"""
         return self.base * self.altezza
     
-    def contiene(self, rettangolo2):
+    def contiene(self, rettangolo2)-> bool:
         """Metodo che verifica se il rettangolo chiamante contiene il rettangolo passato come parametro"""
         if isinstance(rettangolo2, Rettangolo):
             if self.base > rettangolo2.base and self.altezza > rettangolo2.altezza:
@@ -45,9 +45,11 @@ class Rettangolo(object):
 
     @property
     def base(self):
+        """Metodo getter per l'attributo base"""
         return self.__base
     @base.setter
     def base(self, base):
+        """Metodo setter per l'attributo base che verifica che il valore sia un numero positivo"""
         if isinstance(base, (int, float)) and base > 0:
             self.__base = base
         else:
@@ -55,9 +57,11 @@ class Rettangolo(object):
 
     @property
     def altezza(self):
+        """Metodo getter per l'attributo altezza"""
         return self.__altezza
     @altezza.setter
     def altezza(self, altezza):
+        """Metodo setter per l'attributo altezza che verifica che il valore sia un numero positivo"""
         if isinstance(altezza, (int, float)) and altezza > 0:
             self.__altezza = altezza
         else:
