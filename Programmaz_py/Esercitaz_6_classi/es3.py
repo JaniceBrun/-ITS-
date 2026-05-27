@@ -18,6 +18,7 @@ class Calcolo(object):
     def factorial(self, numero):
         for base in range(1, numero + 1):
             base = 1 * base
+            base += base +1
         return base
 
     def sum(self, n):
