@@ -16,6 +16,11 @@ export const db = new sqlite3.Database("./database/libreria.db");
 //inizializazione rotte
 app.use(`${BASE_PATH}/libri`, libriRouter);
 
+
+//integrazione Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+
 // attivo il listener dell'appl sulla porta 3000
 app.listen(PORT, () => {
     console.log(`Server attivo sulla porta ${PORT}`);
