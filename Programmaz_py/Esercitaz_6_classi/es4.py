@@ -121,7 +121,7 @@ class Studente(Persona):
         return f"{super().__str__()} - Scuola : {self.scuola} - Media voti : {self.mediaVoti}"
 
 # definizione della classe Lavoratore che deriva dalla classe Persona con attributi azienda e stipendio, metodi getter e setter, costruttore e metodo __str__ derivato dalla classe Persona
-   
+    
 class Lavoratore(Persona):
     """ Classe che rappresenta un lavoratore con azienda e stipendio, metodi getter e setter, costruttore e metodo __str__ derivato dalla classe Persona"""
     def __init__(self, nome, indirizzo, eta, azienda, stipendio):
@@ -161,12 +161,12 @@ class Lavoratore(Persona):
             raise ValueError("Stipendio must be a number")
 
 # overriding del metodo __str__ per restituire nome, indirizzo, età, azienda e stipendio
-         
+            
     def __str__(self):
         return f"{super().__str__()} - Azienda : {self.azienda} - Stipendio : {self.stipendio}€"
     
- # istanzazione di un oggetto per ogni classe e test dei metodi __str__
-  
+# istanzazione di un oggetto per ogni classe e test dei metodi __str__
+
 janice = Persona("Janice", "Corso Siracusa", 33)
 print(janice)
 

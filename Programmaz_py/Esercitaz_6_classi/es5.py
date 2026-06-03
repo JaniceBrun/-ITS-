@@ -73,7 +73,7 @@ class AritmeticaDu(object):
             return f"{self} > {oggetto2}"
         else:
             return f"{self.prodotto()} < {oggetto2.prodotto()}"
-       
+        
     # overriding del metodo __str__ per restituire una stringa con i valori dei due operandi
 
     def __str__(self):
