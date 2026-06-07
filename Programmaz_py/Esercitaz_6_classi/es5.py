@@ -114,7 +114,7 @@ class AritmeticaTre(AritmeticaDu):
         """Metodo che restituisce il prodotto dei tre operandi"""
         return (super().prodotto()) * self.operando3
 
-   # metodo per il confronto tra il prodotto di due oggetti AritmeticaTre
+    # metodo per il confronto tra il prodotto di due oggetti AritmeticaTre
 
     def differenza(self):
         """Metodo che restituisce la differenza tra il maggiore e il minore dei tre operandi"""

@@ -8,4 +8,7 @@ Provare il programma con testi classici come la Divina Commedia di Dante Alighie
 reperibile sul sito del progetto Gutenberg.
 
 """
-from es2 import Lettore
+
+class LtturaFile(object):
+    def __init__(self):
+        pass

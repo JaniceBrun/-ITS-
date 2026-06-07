@@ -8,7 +8,27 @@ Istanziare la classe e provare i metodi implementati.
 
 """
 
-class Lettore:
+class Lettore(object):
 
     def __init__(self):
         pass
+
+    def lettura(self):
+        with open("stringa.txt", "r") as fh:
+            return fh.read()
+    
+
+    def maxword(self, contenutoFile):
+        parolaMax = max(contenutoFile.split(' '), key=len)
+
+        return parolaMax
+    
+    def scrittura(self, valore):
+        
+        with open("outputes2.txt", "w") as fh:
+            fh.write(valore)
+
+miao = Lettore()
+miao.lettura()
+miao.maxword(miao.lettura())
+miao.scrittura(miao.maxword(miao.lettura()))
