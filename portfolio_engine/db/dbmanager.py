@@ -22,7 +22,7 @@ def init_db():
     cursor = conn.cursor()
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS positions
+        CREATE TABLE IF NOT EXISTS positions (
             id       INTEGER PRIMARY KEY AUTOINCREMENT,
             ticker   TEXT NOT NULL UNIQUE,
             name     TEXT NOT NULL,
@@ -37,7 +37,7 @@ def init_db():
             position_id     INTEGER NOT NULL REFERENCES positions(id),
             quantity        REAL    NOT NULL CHECK(quantity > 0),
             price           REAL    NOT NULL CHECK(price > 0),
-            purchased_on)   TEXT    NOT NULL
+            purchased_on    TEXT    NOT NULL
         )
     """)
 
