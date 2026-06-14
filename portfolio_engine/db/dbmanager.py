@@ -271,6 +271,31 @@ def get_latest_price(position_id):
     return dict(row) if row else None
 
 
+def get_price_by_date(position_id, date):
+    """
+    Recupera il prezzo salvato in price_history per una data specifica.
+    - position_id: id della posizione
+    - date: data in formato YYYY-MM-DD
+    - restituisce il record come dizionario, oppure None se non trovato
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # cerca il prezzo più vicino alla data richiesta
+    # ORDER BY ABS permette di trovare il record più vicino
+    # nel caso non ci sia un record esatto per quella data
+    cursor.execute("""
+        SELECT price, recorded_on FROM price_history
+        WHERE position_id = ?
+        AND recorded_on <= ?
+        ORDER BY recorded_on DESC
+        LIMIT 1
+    """, (position_id, date))
+
+    row = cursor.fetchone()
+    conn.close()
+
+    return dict(row) if row else None
 
 
 
