@@ -4,7 +4,7 @@ import os
 # aggiungo la root del path del progetto coy python trova i moduli
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from db.dbmanager import (
+from portfolio_engine.db.db_manager import (
     init_db, add_position, add_purchase, get_position_by_ticker,
     get_all_positions, get_position_summary, remove_position,
     update_purchase, add_price_snapshot, get_latest_price
