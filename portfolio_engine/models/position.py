@@ -7,13 +7,23 @@ class Position(object):
     Rappresenta uno strumento finanziario in portafoglio
     Corrisponde ad un record nella tabella del db
     """
-    VALID_TYPES = ("etf", "etc", "etn", "azione")
+    #attributi di classe
+    VALID_TYPES = ("etf", "etc", "etn", "azione", "obbligazione", "crypto")
+    #mappa categorie macro
+    MACRO_CATEGORIES = {
+        "etf": "Investment",
+        "etc": "Investment",
+        "etn": "Investment",
+        "azione": "Investment",
+        "obbligazione": "Bonds & Money",
+        "crypto": "Investment",
+    }
     def __init__(self, id, ticker, name, type, currency="EUR"):
         self.__id = id
         self.__ticker = ticker
         self.__name = name
         self.__currency = currency
-        self.type = type #usa setter x validaz
+        self.__type = type #usa setter x validaz
 
     #getter id
     @property
@@ -56,6 +66,17 @@ class Position(object):
             raise ValueError("currency deve essere una stringa non vuota")
         self.__currency = value.upper()
 
+    # getter e setter type
+    @property
+    def type(self):
+        return self.__type
+    
+    @type.setter
+    def type(self, value):
+        if value not in self.VALID_TYPES:
+            raise ValueError("categoria non presente")
+        self.__type = value
+
     #METODI DELLA CLASSE
     def from_dict(cls, data):
         """
@@ -83,18 +104,14 @@ class Position(object):
             "currency": self.currency
         }
     
+    def macro_category(self):
+        """
+        Restituisce la categoria macro dello strumento
+        """
+        return self.MACRO_CATEGORIES.get(self.type, "Altro")
 
-VALID_TYPES = ("etf", "etc", "etn", "azione", "obbligazione", "crypto")
-#mappa categorie macro
 
-MACRO_CATEGORIES = {
-    "etf": "Investment",
-    "etc": "Investment",
-    "etn": "Investment",
-    "azione": "Investment",
-    "obbligazione": "Bonds & Money",
-    "crypto": "Investment",
-}
+
 
 
 

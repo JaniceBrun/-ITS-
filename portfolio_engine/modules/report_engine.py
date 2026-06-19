@@ -8,7 +8,7 @@ from models.portfolio import Portfolio #classe
 
 # Funzione per creazione oggetto Position dai dati
 
-def build_position_object(position_data):
+def build_position_object(position_data: dict):
     """
     crea un oggetto Position da un dict di dati calcolati
     - position_data: dizionario con i dati di una posizione da portfolio_logic
@@ -25,7 +25,7 @@ def build_position_object(position_data):
 
 # Funzione per creare oggetto Portfolio dai dati calcolati
 
-def build_portfolio_object(portfolio_data):
+def build_portfolio_object(portfolio_data:dict):
     """
     Crea un oggetto Portfolio dai dati calcolati da portfolio_logic
     - portfolio_data: dizionario restituito da calculate_portfolio()
@@ -48,7 +48,7 @@ def build_portfolio_object(portfolio_data):
 
 # Funzione per stampare la tabella
 
-def print_portfolio_table(portfolio):
+def print_portfolio_table(portfolio: Portfolio):
     """
     Stampa una tabella formattata con tutte le posizioni del portafoglio.
     - portfolio: oggetto Portfolio con le posizioni    
@@ -69,4 +69,27 @@ def print_portfolio_table(portfolio):
 
     #costruzione dati per ogni riga
     rows = []
-    for position in portfolio.position:
+    for position in portfolio.positions:
+        position: Position
+        rows.append([
+            position.ticker,
+            position.name,
+            position.type.upper(),
+            f"{position.quantity:.0f}",
+            f"€ {position.avg_price:.2f}",
+            f"€ {position.total_cost:.2f}",
+            f"€ {position.current_price:.2f}",
+            f"€ {position.current_value:.2f}",
+            f"€ {position.pl_abs:.2f}",
+            f"{position.pl_pct:.2f}%",
+            f"{position.weight_pct:.2f}%"            
+        ])
+
+    # stampa tabella
+    print("\n" + "="*140)
+    print(f"PORTAFOGLIO - Valore totale: € {portfolio.total_value:.2f}")
+    print("="*140 + "\n")
+    print(tabulate(rows, headers=headers, tablefmt="grid"))
+    print("\n" + "="*140)
+    print(f"TOTALI | Costo: € {portfolio.total_cost:.2f} | Valore: € {portfolio.total_value:.2f} | P/L: € {portfolio.pl_total_abs:.2f} ({portfolio.pl_total_pct:.2f}%)")
+    print("="*140 + "\n")    

@@ -26,7 +26,7 @@ def init_db():
             id       INTEGER PRIMARY KEY AUTOINCREMENT,
             ticker   TEXT NOT NULL UNIQUE,
             name     TEXT NOT NULL,
-            type     TEXT NOT NULL CHECK (type IN('etf', 'etc', 'etn', 'azione')),
+            type     TEXT NOT NULL CHECK (type IN('etf', 'etc', 'etn', 'azione', 'obbligazione', 'crypto')),
             currency TEXT NOT NULL DEFAULT 'EUR'
         )
     """)
