@@ -24,3 +24,6 @@
 ## Aggiunte in corso di sviluppo
 - (aggiornare man mano che emergono nuovi problemi)
 
+
+-valutare inserimento rollback() assieme ai commit()
+
