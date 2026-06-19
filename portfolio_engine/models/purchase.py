@@ -95,7 +95,7 @@ class Purchase(object):
 
 # metodi rappresentazione
     def __repr__(self):
-        return f"Purchase(position_id={self._position_id}, qty={self._quantity}, price={self._price}, date={self._purchased_on})"
+        return f"Purchase(position_id={self.position_id}, qty={self.quantity}, price={self.price}, date={self.purchased_on})"
 
     def __str__(self):
-        return f"Acquisto {self._quantity} quote a {self._price}€ il {self._purchased_on}"
+        return f"Acquisto {self.quantity} quote a {self.price}€ il {self.purchased_on}"

@@ -60,10 +60,10 @@ def print_portfolio_table(portfolio: Portfolio):
         "Quantità",
         "Prezzo Medio",
         "Costo Totale",
-        "Prezzo COrrente",
+        "Prezzo Corrente",
         "Valore Attuale",
         "P/L €",
-        "P/L &",
+        "P/L %",
         "Weight %"
     ]
 
@@ -93,3 +93,17 @@ def print_portfolio_table(portfolio: Portfolio):
     print("\n" + "="*140)
     print(f"TOTALI | Costo: € {portfolio.total_cost:.2f} | Valore: € {portfolio.total_value:.2f} | P/L: € {portfolio.pl_total_abs:.2f} ({portfolio.pl_total_pct:.2f}%)")
     print("="*140 + "\n")    
+
+    #funzione principale orchestratrice
+
+def generate_report(portfolio_data: dict) -> None:
+    """
+    Genera un report completo del portafoglio
+    Orchestratore principale del report_engine.
+    - portafolio_data: dict restituito da portfolio_logic.calculare_portfolio()
+    """
+    #converte i dati in oggetti OOP
+    portfolio = build_portfolio_object(portfolio_data)
+
+    #stampa report
+    print_portfolio_table(portfolio)

@@ -1,4 +1,6 @@
 """Creazione classe Portfolio"""
+from typing import List
+from models.position import Position
 
 class Portfolio(object):
     """
@@ -20,7 +22,7 @@ class Portfolio(object):
 
     # getter position
     @property
-    def positions(self):
+    def positions(self) -> List[Position]:
         """
         Restituisce lista posizione
         serve a report_engine per iterare posizioni
@@ -81,7 +83,7 @@ class Portfolio(object):
         self.__pl_total_abs = pl_total_abs
         self.__pl_total_pct = pl_total_pct
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Converte il pf in dict per serializzare
         """
