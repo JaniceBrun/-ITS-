@@ -4,8 +4,8 @@ import argparse
 from db.db_manager import (
     init_db, add_position, add_purchase, get_all_positions, remove_position
 )
-from modules.portfolio_logic import calculate_portfolio, update_prices
-from modules.report_engine import generate_report
+from modules.portfolio_logic import calculate_portfolio , update_prices
+from modules.report_engine import generate_report, build_portfolio_object, print_portfolio_table
 
 def main():
     """
@@ -73,7 +73,7 @@ Esempi di utilizzo:
         parser.print_help()
 
 
-def handle_add(args):
+def handle_add(args: argparse.Namespace):
     """
     Gestisce comando add
     """
@@ -84,7 +84,7 @@ def handle_add(args):
     except Exception as e:
         print(f"Errore: {e}")
 
-def handle_remove(args):
+def handle_remove(args : argparse.Namespace):
     """
     Gestisce il comando remove
     """
@@ -95,7 +95,7 @@ def handle_remove(args):
         print(f"Errore: {e}")
 
 
-def handle_show(args):
+def handle_show(args: argparse.Namespace):
     """
     Gestisce il comando show
     """
@@ -104,9 +104,15 @@ def handle_show(args):
             filter_type=args.type,
             filter_min_value=args.min_value
         )
+        #debug
+        # print(f"DEBUG: portfolio_data = {portfolio_data}")
+        # print(f"DEBUG: keys = {portfolio_data.keys()}")
+        
         generate_report(portfolio_data)
     except Exception as e:
-        print(f"  ✗ Errore: {e}")
+        # import traceback
+        print(f"Errore: {e}")
+        # traceback.print_exc()
 
 
 def handle_update():
@@ -120,19 +126,25 @@ def handle_update():
         print(f"Errore: {e}")
 
 
-def handle_report(args):
+def handle_report(args: argparse.Namespace):
     """
     Gestisce il comando report
     """
     try:
         portfolio_data = calculate_portfolio(reference_date=args.from_date)
         
+        # converte in oggetto Portfolio
+        portfolio = build_portfolio_object(portfolio_data)
+        
         if args.pdf:
-            print("Report PDF non ancora implementato")
+            # genera PDF
+            from modules.report_engine import generate_pdf_report
+            generate_pdf_report(portfolio)
         else:
-            generate_report(portfolio_data)
+            # stampa report nel terminale
+            print_portfolio_table(portfolio)
     except Exception as e:
-        print(f"Errore: {e}")
+        print(f"  ✗ Errore: {e}")
 
 
 if __name__ == "__main__":

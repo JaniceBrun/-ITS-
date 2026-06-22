@@ -44,6 +44,7 @@ def calculate_position(position, summary, current_price, previous_price=None, pr
         delta_pct = None
 
     return {
+        "id":             position["id"],
         "ticker":         position["ticker"],
         "name":           position["name"],
         "type":           position["type"],
@@ -130,6 +131,10 @@ def get_portfolio_data( reference_date=None):
     tickers = [p["ticker"] for p in positions]
     current_prices = get_all_prices(tickers)
 
+    # DEBUG
+    # print(f"DEBUG: tickers = {tickers}")
+    # print(f"DEBUG: current_prices = {current_prices}")
+
     results = []
 
     for position in positions:
@@ -149,7 +154,12 @@ def calculate_totals(results):
     - restituisce un dizionario con i totali del portafoglio
     """
     if not results:
-        return {}
+        return {
+            "total_value": 0.0,
+            "total_cost": 0.0,
+            "pl_total_abs": 0.0,
+            "pl_total_pct": 0.0,
+        }            
 
     total_value = sum(r["current_value"] for r in results)
     total_cost  = sum(r["total_cost"]    for r in results)
