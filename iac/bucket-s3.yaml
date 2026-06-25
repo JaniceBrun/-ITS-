@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  ITS ICT Piemonte - ACA Infrastructure as Code - Lab L01
+  Il tuo PRIMO template CloudFormation: un bucket S3.
+  E' la stessa cosa che nel lab di Architettura hai fatto a mano con 5 click,
+  ma qui e' descritta in un file di testo: ripetibile, versionabile, cancellabile in un colpo.
+
+# ──────────────────────────────────────────────────────────────
+# PARAMETERS = le "domande" che il template ti fa quando lo lanci.
+# Servono a riusare lo STESSO file con valori diversi.
+# ──────────────────────────────────────────────────────────────
+Parameters:
+  NomeStudente:
+    Type: String
+    Description: Il tuo nome (minuscolo, senza spazi). Rende unico il nome del bucket.
+    AllowedPattern: '[a-z0-9-]+'
+    ConstraintDescription: solo lettere minuscole, numeri e trattini.
+
+# ──────────────────────────────────────────────────────────────
+# RESOURCES = l'unica sezione OBBLIGATORIA. Cosa vuoi che esista.
+# ──────────────────────────────────────────────────────────────
+Resources:
+  MioBucket:
+    Type: AWS::S3::Bucket          # che risorsa e'
+    Properties:                    # le impostazioni
+      # !Sub inserisce il valore del parametro dentro la stringa.
+      # Il nome di un bucket S3 e' unico in TUTTO il mondo: per questo nome + anno.
+      BucketName: !Sub 'its-${NomeStudente}-2026'
+      VersioningConfiguration:
+        Status: Suspended          # nel lab Step 3 lo porterai a "Enabled"
+      Tags:
+        - Key: Owner
+          Value: !Ref NomeStudente
+        - Key: Corso
+          Value: ACA-IaC
+        - Key: Miao
+          Value: Doublemiao
+
+# ──────────────────────────────────────────────────────────────
+# OUTPUTS = i valori che il template ti restituisce dopo il deploy.
+# ──────────────────────────────────────────────────────────────
+Outputs:
+  NomeBucket:
+    Description: Nome del bucket creato
+    Value: !Ref MioBucket

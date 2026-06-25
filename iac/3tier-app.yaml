@@ -1,0 +1,242 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  ITS ICT Piemonte - ACA Infrastructure as Code - Esempio portante
+  Architettura 3-TIER classica come CODICE:
+    - Tier 1 (web)  : Application Load Balancer su subnet pubbliche (2 AZ)
+    - Tier 2 (app)  : Auto Scaling Group di EC2 su subnet PRIVATE (2 AZ)
+    - Tier 3 (dati) : database RDS MySQL su subnet private, cifrato
+  E' lo stesso disegno che progettate nella lezione di Architettura: qui e' un file.
+  NB: e' il template "di riferimento" da leggere/mostrare. Il deploy completo (RDS+NAT)
+  va su un account reale; in aula i lab live usano i template piccoli e veloci.
+
+# ════════════════════════════════════════════════════════════════════════
+# PARAMETERS - gli input. Stesso file, ambienti diversi: niente copia-incolla.
+# ════════════════════════════════════════════════════════════════════════
+Parameters:
+  Env:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, prod]
+    Description: Ambiente. Cambia le dimensioni della flotta e l'HA del DB.
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues: [t3.micro, t3.small]
+  LatestAmiId:
+    # Risolve da solo l'ultima AMI Amazon Linux 2023: niente ID copiati a mano.
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+
+# ════════════════════════════════════════════════════════════════════════
+# MAPPINGS - tabella di lookup: in prod la flotta e' piu' grande.
+# ════════════════════════════════════════════════════════════════════════
+Mappings:
+  EnvToCapacity:
+    dev:  { Desired: 2, Max: 2 }
+    prod: { Desired: 4, Max: 8 }
+
+# ════════════════════════════════════════════════════════════════════════
+# CONDITIONS - logica if: il Multi-AZ del DB lo accendiamo solo in prod.
+# ════════════════════════════════════════════════════════════════════════
+Conditions:
+  IsProd: !Equals [!Ref Env, prod]
+
+Resources:
+
+  # ---------- RETE ----------
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: [{ Key: Name, Value: !Sub '${Env}-3tier-vpc' }]
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.10.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.11.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+
+  IGW:
+    Type: AWS::EC2::InternetGateway
+  AttachIGW:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: { VpcId: !Ref VPC, InternetGatewayId: !Ref IGW }
+
+  PublicRT:
+    Type: AWS::EC2::RouteTable
+    Properties: { VpcId: !Ref VPC }
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachIGW
+    Properties:
+      RouteTableId: !Ref PublicRT
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGW
+  PubAssocA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: { SubnetId: !Ref PublicSubnetA, RouteTableId: !Ref PublicRT }
+  PubAssocB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: { SubnetId: !Ref PublicSubnetB, RouteTableId: !Ref PublicRT }
+
+  # NAT: fa uscire verso Internet i server privati (per aggiornamenti), senza esporli.
+  NatEIP:
+    Type: AWS::EC2::EIP
+    Properties: { Domain: vpc }
+  NatGW:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEIP.AllocationId
+      SubnetId: !Ref PublicSubnetA
+  PrivateRT:
+    Type: AWS::EC2::RouteTable
+    Properties: { VpcId: !Ref VPC }
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRT
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGW
+  PrivAssocA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: { SubnetId: !Ref PrivateSubnetA, RouteTableId: !Ref PrivateRT }
+  PrivAssocB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: { SubnetId: !Ref PrivateSubnetB, RouteTableId: !Ref PrivateRT }
+
+  # ---------- SECURITY GROUPS (la "catena": web -> app -> dati) ----------
+  ALBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB - accetta HTTP da Internet
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0 }
+  AppSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: App tier - traffico solo dal Load Balancer
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, SourceSecurityGroupId: !Ref ALBSG }
+  DBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: DB - accetta MySQL SOLO dai server app
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 3306, ToPort: 3306, SourceSecurityGroupId: !Ref AppSG }
+
+  # ---------- TIER APP: Launch Template + ALB + Auto Scaling Group ----------
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Sub '${Env}-app-lt'
+      LaunchTemplateData:
+        InstanceType: !Ref InstanceType
+        ImageId: !Ref LatestAmiId
+        SecurityGroupIds: [!Ref AppSG]
+        UserData:
+          Fn::Base64: |
+            #!/bin/bash
+            dnf -y install httpd
+            systemctl enable --now httpd
+            echo "<h1>App tier - $(hostname) - ITS ICT</h1>" > /var/www/html/index.html
+
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: application
+      Scheme: internet-facing
+      Subnets: [!Ref PublicSubnetA, !Ref PublicSubnetB]
+      SecurityGroups: [!Ref ALBSG]
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref VPC
+      Port: 80
+      Protocol: HTTP
+      HealthCheckPath: /
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ALB
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - { Type: forward, TargetGroupArn: !Ref TargetGroup }
+
+  AppASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      MinSize: 1
+      MaxSize: !FindInMap [EnvToCapacity, !Ref Env, Max]
+      DesiredCapacity: !FindInMap [EnvToCapacity, !Ref Env, Desired]
+      TargetGroupARNs: [!Ref TargetGroup]
+      Tags:
+        - { Key: Name, Value: !Sub '${Env}-app', PropagateAtLaunch: true }
+
+  # ---------- TIER DATI: RDS MySQL su subnet private ----------
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet private per il database
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+  Database:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete
+    Properties:
+      Engine: mysql
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: '20'
+      MasterUsername: admin
+      # Best practice "senior": RDS genera e custodisce la password in Secrets Manager
+      # (vedi vostra lezione L08). Cosi' nel template NON c'e' nessuna password.
+      ManageMasterUserPassword: true
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VPCSecurityGroups: [!Ref DBSG]
+      MultiAZ: !If [IsProd, true, false]     # alta affidabilita' solo in prod
+      StorageEncrypted: true
+      PubliclyAccessible: false
+
+# ════════════════════════════════════════════════════════════════════════
+# OUTPUTS - i valori utili dopo il deploy.
+# ════════════════════════════════════════════════════════════════════════
+Outputs:
+  URLSito:
+    Description: Indirizzo pubblico dell'app (il Load Balancer)
+    Value: !Sub 'http://${ALB.DNSName}'
+  DBEndpoint:
+    Description: Endpoint privato del database
+    Value: !GetAtt Database.Endpoint.Address
+  Ambiente:
+    Description: Ambiente creato
+    Value: !Ref Env
